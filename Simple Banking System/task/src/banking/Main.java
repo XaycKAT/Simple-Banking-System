@@ -1,5 +1,7 @@
 package banking;
 
+import banking.obj.Bank;
+
 public class Main {
     public static void main(String[] args) {
         Bank bank = new Bank();

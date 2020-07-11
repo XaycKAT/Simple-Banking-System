@@ -1,15 +1,15 @@
-package banking;
-
-import banking.obj.Account;
+package banking.obj;
 
 import java.util.*;
 import java.util.concurrent.ThreadLocalRandom;
+import java.util.stream.Collectors;
 
 public class Bank {
 
     private List<Account> accounts = new ArrayList<>();
     private Scanner scanner;
-    private String CARD_MASK = "400000";
+    private String BIN = "400000";
+
 
     public Bank() {
         scanner = new Scanner(System.in);
@@ -39,10 +39,12 @@ public class Bank {
     }
 
     private void createAccount() {
-        Long number = ThreadLocalRandom.current().nextLong(1000000000L, 9000000000L);
+        String number = BIN + ThreadLocalRandom.current().nextLong(100_000_000L,
+                900_000_000L);
         Integer pin = ThreadLocalRandom.current().nextInt(1000, 9000);
-        accounts.add(new Account(CARD_MASK + number, pin, 0L));
-        printCardCreate(CARD_MASK + number,pin);
+        number += LuhnCheck(number);
+        accounts.add(new Account(number, pin, 0L));
+        printCardCreate(number, pin);
     }
 
     private void loginAccount() {
@@ -65,5 +67,17 @@ public class Bank {
         System.out.println("1. Create an account\n" +
                 "2. Log into account\n" +
                 "0. Exit");
+    }
+
+    private Integer LuhnCheck(String cardNumber) {
+        List<Integer> list = Arrays.stream(cardNumber.split("")).map(Integer::parseInt)
+                .collect(Collectors.toList());
+        for (int i = 0; i < list.size(); i += 2) {
+            Integer num = list.get(i) * 2;
+            if (num > 9)
+                num = num / 10 + num % 10;
+            list.set(i, num);
+        }
+        return (10 - list.stream().mapToInt(Integer::intValue).sum() % 10) % 10;
     }
 }
