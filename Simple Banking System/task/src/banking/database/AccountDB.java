@@ -4,12 +4,24 @@ import banking.obj.Account;
 
 import java.sql.*;
 
-public class DataBase {
+public class AccountDB {
 
     private String fileName;
 
-    public DataBase(String fileName) {
+    public AccountDB(String fileName) {
         this.fileName = fileName;
+    }
+
+    private Connection connect() {
+        // SQLite connection string
+        String url = "jdbc:sqlite:" + fileName;
+        Connection conn = null;
+        try {
+            conn = DriverManager.getConnection(url);
+        } catch (SQLException e) {
+            System.out.println(e.getMessage());
+        }
+        return conn;
     }
 
     public void createNewDatabase() {
@@ -44,19 +56,10 @@ public class DataBase {
         }
     }
 
-    private Connection connect() {
-        // SQLite connection string
-        String url = "jdbc:sqlite:" + fileName;
-        Connection conn = null;
-        try {
-            conn = DriverManager.getConnection(url);
-        } catch (SQLException e) {
-            System.out.println(e.getMessage());
-        }
-        return conn;
-    }
-
-    public void insert(String number, String pin) {
+    public void insert(Account account) {
+        String number = account.getCardNumber();
+        String pin = account.getPin();
+        
         String sql = "INSERT INTO card(number , pin) VALUES(?,?)";
 
         try (Connection conn = this.connect();
@@ -70,13 +73,14 @@ public class DataBase {
     }
 
     public Account selectAccount(String number) {
+        
         String sql = "SELECT pin, balance FROM card WHERE number = ?";
 
         try (Connection conn = this.connect();
-             PreparedStatement statement  = conn.prepareStatement(sql)){
+             PreparedStatement statement = conn.prepareStatement(sql)) {
 
-            statement.setString(1,number);
-            ResultSet rs  = statement.executeQuery();
+            statement.setString(1, number);
+            ResultSet rs = statement.executeQuery();
 
             return new Account(number, rs.getString("pin"), rs.getLong("balance"));
         } catch (SQLException e) {

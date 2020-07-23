@@ -1,17 +1,41 @@
 package banking.obj;
 
-import java.util.List;
 import java.util.Scanner;
+import java.util.concurrent.ThreadLocalRandom;
+
+import static banking.other.Utils.LuhnCheck;
 
 public class Account {
     private String cardNumber;
     private String pin;
     private Long balance;
 
+    public Account() {
+        this.cardNumber = generateNumber();
+        this.pin = generatePin();
+        this.balance = 0L;
+    }
+
     public Account(String cardNumber, String pin, Long balance) {
         this.cardNumber = cardNumber;
         this.pin = pin;
         this.balance = balance;
+    }
+
+    private String generatePin() {
+        return String.valueOf(ThreadLocalRandom.current().nextInt(1000, 9000));
+    }
+
+    private String generateNumber() {
+        String BIN = "400000";
+        String num = BIN + ThreadLocalRandom.current().nextLong(100_000_000L,
+                900_000_000L);
+        return num += LuhnCheck(num);
+    }
+
+    public void printCardInfo() {
+        System.out.println("Your card has been created\n" + "Your card number:\n" + this.getCardNumber());
+        System.out.println("Your card PIN:\n" + this.getPin() + "\n");
     }
 
     public String getCardNumber() {
@@ -41,15 +65,18 @@ public class Account {
     public void runAccountMenu() {
         Scanner scanner = new Scanner(System.in);
         printMenu();
-        Integer command = scanner.nextInt();
+        int command = scanner.nextInt();
 
-        switch(command) {
-            case 1: System.out.println(this.getBalance());
+        switch (command) {
+            case 1:
+                System.out.println(this.getBalance());
                 this.runAccountMenu();
                 break;
-            case 2: System.out.println("You have successfully logged out!");
+            case 2:
+                System.out.println("You have successfully logged out!");
                 break;
-            case 0: System.out.println("Bye!");
+            case 0:
+                System.out.println("Bye!");
                 System.exit(0);
             default:
         }

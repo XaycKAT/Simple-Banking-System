@@ -1,16 +1,13 @@
 package banking.obj;
 
-import banking.database.DataBase;
+import banking.database.AccountDB;
 
 import java.util.*;
-import java.util.concurrent.ThreadLocalRandom;
-import java.util.stream.Collectors;
 
 public class Bank {
 
     private Scanner scanner;
-    private String BIN = "400000";
-    private DataBase dataBase;
+    private AccountDB accountDB;
 
 
     public Bank() {
@@ -23,10 +20,10 @@ public class Bank {
 
     public void initDataBase(String[] args) {
         try {
-            DataBase db = new DataBase(args[1]);
+            AccountDB db = new AccountDB(args[1]);
             db.createNewDatabase();
             db.createNewTable();
-            this.dataBase = db;
+            this.accountDB = db;
         } catch (ArrayIndexOutOfBoundsException e) {
             System.out.println(e.getMessage());
         }
@@ -50,51 +47,30 @@ public class Bank {
         }
     }
 
-    private void printCardCreate(String cardNumber, Integer pin) {
-        System.out.println("Your card has been created\n" + "Your card number:\n" + cardNumber);
-        System.out.println("Your card PIN:\n" + pin + "\n");
-    }
-
     private void createAccount() {
-        String number = BIN + ThreadLocalRandom.current().nextLong(100_000_000L,
-                900_000_000L);
-        Integer pin = ThreadLocalRandom.current().nextInt(1000, 9000);
-        number += LuhnCheck(number);
-        dataBase.insert(number, pin.toString());
-        printCardCreate(number, pin);
+        Account account = new Account();
+        accountDB.insert(account);
+        account.printCardInfo();
     }
 
     private void loginAccount() {
         System.out.println("Enter your card number:");
         String number = scanner.next();
         System.out.println("Enter your PIN:");
-        Integer pin = scanner.nextInt();
-        Account account = dataBase.selectAccount(number);
+        String pin = scanner.next();
+        Account account = accountDB.selectAccount(number);
 
-        if (account != null && pin.toString().equals(account.getPin())) {
+        if (account != null && pin.equals(account.getPin())) {
             System.out.println("You have successfully logged in!\n");
             account.runAccountMenu();
         } else {
             System.out.println("Wrong card number or PIN!\n");
         }
-
     }
 
     private static void printMainMenu() {
         System.out.println("1. Create an account\n" +
                 "2. Log into account\n" +
                 "0. Exit");
-    }
-
-    private Integer LuhnCheck(String cardNumber) {
-        List<Integer> list = Arrays.stream(cardNumber.split("")).map(Integer::parseInt)
-                .collect(Collectors.toList());
-        for (int i = 0; i < list.size(); i += 2) {
-            Integer num = list.get(i) * 2;
-            if (num > 9)
-                num = num / 10 + num % 10;
-            list.set(i, num);
-        }
-        return (10 - list.stream().mapToInt(Integer::intValue).sum() % 10) % 10;
     }
 }
