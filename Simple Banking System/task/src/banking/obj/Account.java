@@ -5,10 +5,10 @@ import java.util.Scanner;
 
 public class Account {
     private String cardNumber;
-    private Integer pin;
+    private String pin;
     private Long balance;
 
-    public Account(String cardNumber, Integer pin, Long balance) {
+    public Account(String cardNumber, String pin, Long balance) {
         this.cardNumber = cardNumber;
         this.pin = pin;
         this.balance = balance;
@@ -22,11 +22,11 @@ public class Account {
         this.cardNumber = cardNumber;
     }
 
-    public Integer getPin() {
+    public String getPin() {
         return pin;
     }
 
-    public void setPin(Integer pin) {
+    public void setPin(String pin) {
         this.pin = pin;
     }
 
@@ -36,11 +36,6 @@ public class Account {
 
     public void setBalance(Long balance) {
         this.balance = balance;
-    }
-
-    public static Account findAccountByCardNumber(String number, List<Account> accounts) {
-        return accounts.stream().filter(account -> account.getCardNumber().equals(number))
-                .findFirst().orElse(null);
     }
 
     public void runAccountMenu() {

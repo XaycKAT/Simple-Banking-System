@@ -1,21 +1,38 @@
 package banking.obj;
 
+import banking.database.DataBase;
+
 import java.util.*;
 import java.util.concurrent.ThreadLocalRandom;
 import java.util.stream.Collectors;
 
 public class Bank {
 
-    private List<Account> accounts = new ArrayList<>();
     private Scanner scanner;
     private String BIN = "400000";
+    private DataBase dataBase;
 
 
     public Bank() {
         scanner = new Scanner(System.in);
     }
 
-    public void runStartMenu() {
+    public void run() {
+        runStartMenu();
+    }
+
+    public void initDataBase(String[] args) {
+        try {
+            DataBase db = new DataBase(args[1]);
+            db.createNewDatabase();
+            db.createNewTable();
+            this.dataBase = db;
+        } catch (ArrayIndexOutOfBoundsException e) {
+            System.out.println(e.getMessage());
+        }
+    }
+
+    private void runStartMenu() {
         printMainMenu();
         Integer command = scanner.nextInt();
         switch (command) {
@@ -43,7 +60,7 @@ public class Bank {
                 900_000_000L);
         Integer pin = ThreadLocalRandom.current().nextInt(1000, 9000);
         number += LuhnCheck(number);
-        accounts.add(new Account(number, pin, 0L));
+        dataBase.insert(number, pin.toString());
         printCardCreate(number, pin);
     }
 
@@ -52,9 +69,9 @@ public class Bank {
         String number = scanner.next();
         System.out.println("Enter your PIN:");
         Integer pin = scanner.nextInt();
-        Account account = Account.findAccountByCardNumber(number, accounts);
+        Account account = dataBase.selectAccount(number);
 
-        if (account != null && pin.equals(account.getPin())) {
+        if (account != null && pin.toString().equals(account.getPin())) {
             System.out.println("You have successfully logged in!\n");
             account.runAccountMenu();
         } else {
