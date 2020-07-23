@@ -2,7 +2,7 @@ package banking.interfaces;
 
 import banking.obj.Account;
 
-public interface AccountDAO {
+public interface DAO {
 
     Account get(String accountNumber);
     void insert(Account account);

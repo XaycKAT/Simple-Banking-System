@@ -1,10 +1,10 @@
 package banking;
 
-import banking.obj.Bank;
+import banking.obj.BankManager;
 
 public class Main {
     public static void main(String[] args) {
-        Bank bank = new Bank();
+        BankManager bank = new BankManager();
         bank.initDataBase(args);
         bank.run();
     }

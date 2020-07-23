@@ -1,12 +1,13 @@
 package banking.database;
 
+import banking.interfaces.DAO;
 import banking.obj.Account;
 
 import java.sql.*;
 
-public class AccountDB {
+public class AccountDB implements DAO {
 
-    private String fileName;
+    private final String fileName;
 
     public AccountDB(String fileName) {
         this.fileName = fileName;
@@ -28,8 +29,7 @@ public class AccountDB {
         try (Connection conn = this.connect()) {
             if (conn != null) {
                 DatabaseMetaData meta = conn.getMetaData();
-//                System.out.println("The driver name is " + meta.getDriverName());
-//                System.out.println("A new database has been created.");
+
             }
 
         } catch (SQLException e) {
@@ -59,7 +59,7 @@ public class AccountDB {
     public void insert(Account account) {
         String number = account.getCardNumber();
         String pin = account.getPin();
-        
+
         String sql = "INSERT INTO card(number , pin) VALUES(?,?)";
 
         try (Connection conn = this.connect();
@@ -72,8 +72,42 @@ public class AccountDB {
         }
     }
 
-    public Account selectAccount(String number) {
-        
+    @Override
+    public void update(Account account) {
+        String sql = "UPDATE card SET balance = ? WHERE number = ?";
+
+        try (Connection conn = this.connect();
+             PreparedStatement pstmt = conn.prepareStatement(sql)) {
+
+            // set the corresponding param
+            pstmt.setLong(1, account.getBalance());
+            pstmt.setString(2, account.getCardNumber());
+            // update
+            pstmt.executeUpdate();
+        } catch (SQLException e) {
+            System.out.println(e.getMessage());
+        }
+    }
+
+    @Override
+    public void delete(String accountNumber) {
+        String sql = "DELETE FROM card WHERE number = ?";
+        try (Connection conn = this.connect();
+             PreparedStatement pstmt = conn.prepareStatement(sql)) {
+
+            // set the corresponding param
+            pstmt.setString(1, accountNumber);
+            // execute the delete statement
+            pstmt.executeUpdate();
+
+        } catch (SQLException e) {
+            System.out.println(e.getMessage());
+        }
+
+    }
+
+    public Account get(String number) {
+
         String sql = "SELECT pin, balance FROM card WHERE number = ?";
 
         try (Connection conn = this.connect();
